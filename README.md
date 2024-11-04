@@ -15,7 +15,11 @@ The User Service handles user management with CRUD operations, while the Notific
    cd your-repo-name
    ```
 
-2. **Build and start the services**:
+2. **Setting Up Environment Variables**
+
+   copy .env.example to .env for each service
+
+3. **Build and start the services**:
 
    ```bash
    docker-compose up --build
