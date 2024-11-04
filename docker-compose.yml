@@ -1,0 +1,55 @@
+version: '3'
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - app-network
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'status']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  user-service:
+    build:
+      context: ./user-service
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./user-service/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+    networks:
+      - app-network
+
+  notification-service:
+    build: ./notification-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./notification-service/.env
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge
